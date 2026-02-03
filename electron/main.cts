@@ -15,6 +15,7 @@ autoUpdater.autoDownload = true; // Automatically download updates
 // }
 
 let mainWindow: BrowserWindow | null = null;
+let isManualCheck = false;
 
 const createWindow = () => {
     // Create the browser window.
@@ -107,15 +108,19 @@ app.on('ready', () => {
     // --- UPDATE EVENTS ---
     ipcMain.on('check-for-updates', () => {
         console.log('[Updater] Manual check started');
+        isManualCheck = true;
         autoUpdater.checkForUpdates().catch(err => {
             console.error('[Updater] Manual check failed:', err);
             mainWindow?.webContents.send('update-status', `Check failed: ${err.message}`);
+            isManualCheck = false;
         });
     });
 
     autoUpdater.on('checking-for-update', () => {
         console.log('[Updater] Checking for update...');
-        mainWindow?.webContents.send('update-status', 'Checking for updates...');
+        if (isManualCheck) {
+            mainWindow?.webContents.send('update-status', 'Checking for updates...');
+        }
     });
     autoUpdater.on('update-available', (info) => {
         console.log(`[Updater] Update available: ${info.version}`);
@@ -123,11 +128,17 @@ app.on('ready', () => {
     });
     autoUpdater.on('update-not-available', () => {
         console.log('[Updater] Update not available.');
-        mainWindow?.webContents.send('update-status', 'App is up to date.');
+        if (isManualCheck) {
+            mainWindow?.webContents.send('update-status', 'App is up to date.');
+            isManualCheck = false;
+        }
     });
     autoUpdater.on('error', (err) => {
         console.error('[Updater] Error:', err);
-        mainWindow?.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
+        if (isManualCheck) {
+            mainWindow?.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
+            isManualCheck = false;
+        }
     });
     autoUpdater.on('download-progress', (progressObj) => {
         const percent = progressObj.percent;
