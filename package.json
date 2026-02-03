@@ -13,6 +13,7 @@
   "build": {
     "appId": "com.physio.registry",
     "productName": "PhysioRegistry",
+    "copyright": "Copyright © 2026 Nedim Huray",
     "publish": [
       {
         "provider": "github",

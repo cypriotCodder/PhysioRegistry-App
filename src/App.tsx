@@ -90,7 +90,7 @@ function AppContent() {
           </button>
         </div>
       </header>
-      <main style={{ paddingBottom: '50px' }}>
+      <main style={{ paddingBottom: '50px', flex: 1 }}>
         {view === 'list' ? (
           <PatientList onSelectPatient={handleEditPatient} />
         ) : view === 'stats' ? (
@@ -125,6 +125,9 @@ function AppContent() {
           </>
         )}
       </main>
+      <footer className="app-footer">
+        &copy; {new Date().getFullYear()} Nedim Huray. All rights reserved.
+      </footer>
     </div>
   )
 }
