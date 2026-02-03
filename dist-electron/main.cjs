@@ -154,8 +154,10 @@ electron_1.app.on('ready', () => {
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
     });
     electron_updater_1.autoUpdater.on('download-progress', (progressObj) => {
-        let log_message = `Download speed: ${progressObj.bytesPerSecond} - ${progressObj.percent}%`;
-        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Downloading: ${progressObj.percent.toFixed(0)}%`);
+        const percent = progressObj.percent;
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-progress', percent);
+        // Keep status message for backward compatibility or simple text display
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Downloading... ${percent.toFixed(0)}%`);
     });
     electron_updater_1.autoUpdater.on('update-downloaded', (info) => {
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-ready', info.version);

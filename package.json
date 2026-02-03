@@ -16,8 +16,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "YOUR_USERNAME",
-        "repo": "RegisterForm"
+        "owner": "cypriotCodder",
+        "repo": "PhysioRegistry-App"
       }
     ],
     "directories": {

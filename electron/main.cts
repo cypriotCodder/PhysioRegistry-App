@@ -115,8 +115,10 @@ app.on('ready', () => {
         mainWindow?.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
     });
     autoUpdater.on('download-progress', (progressObj) => {
-        let log_message = `Download speed: ${progressObj.bytesPerSecond} - ${progressObj.percent}%`;
-        mainWindow?.webContents.send('update-status', `Downloading: ${progressObj.percent.toFixed(0)}%`);
+        const percent = progressObj.percent;
+        mainWindow?.webContents.send('update-progress', percent);
+        // Keep status message for backward compatibility or simple text display
+        mainWindow?.webContents.send('update-status', `Downloading... ${percent.toFixed(0)}%`);
     });
     autoUpdater.on('update-downloaded', (info) => {
         mainWindow?.webContents.send('update-ready', info.version);
