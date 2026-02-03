@@ -29,8 +29,8 @@ const createWindow = () => {
     });
 
     // Check if we are in dev mode
-    const isDev = process.env.NODE_ENV === 'development';
-    console.log(`[Main] Starting window. isDev=${isDev}`);
+    const isDev = !app.isPackaged;
+    console.log(`[Main] Starting window. isDev=${isDev} app.isPackaged=${app.isPackaged}`);
 
     if (isDev) {
         console.log('[Main] Loading localhost:5173');
@@ -44,7 +44,12 @@ const createWindow = () => {
     // Check for updates once window is ready
     mainWindow.once('ready-to-show', () => {
         if (!isDev) {
+            console.log('[Main] Checking for updates...');
             autoUpdater.checkForUpdatesAndNotify();
+        } else {
+            console.log('[Main] Skiping update check in dev mode.');
+            // Optional: Uncomment to test in dev if you have dev-app-update.yml
+            // autoUpdater.checkForUpdatesAndNotify();
         }
     });
 };
@@ -103,15 +108,19 @@ app.on('ready', () => {
 
     // --- UPDATE EVENTS ---
     autoUpdater.on('checking-for-update', () => {
+        console.log('[Updater] Checking for update...');
         mainWindow?.webContents.send('update-status', 'Checking for updates...');
     });
     autoUpdater.on('update-available', (info) => {
+        console.log(`[Updater] Update available: ${info.version}`);
         mainWindow?.webContents.send('update-status', `Update available: ${info.version}`);
     });
     autoUpdater.on('update-not-available', () => {
+        console.log('[Updater] Update not available.');
         mainWindow?.webContents.send('update-status', 'App is up to date.');
     });
     autoUpdater.on('error', (err) => {
+        console.error('[Updater] Error:', err);
         mainWindow?.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
     });
     autoUpdater.on('download-progress', (progressObj) => {
