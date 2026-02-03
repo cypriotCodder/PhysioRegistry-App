@@ -71,8 +71,8 @@ const createWindow = () => {
         },
     });
     // Check if we are in dev mode
-    const isDev = process.env.NODE_ENV === 'development';
-    console.log(`[Main] Starting window. isDev=${isDev}`);
+    const isDev = !electron_1.app.isPackaged;
+    console.log(`[Main] Starting window. isDev=${isDev} app.isPackaged=${electron_1.app.isPackaged}`);
     if (isDev) {
         console.log('[Main] Loading localhost:5173');
         mainWindow.loadURL('http://localhost:5173').catch(e => console.error('[Main] Failed to load URL:', e));
@@ -85,7 +85,13 @@ const createWindow = () => {
     // Check for updates once window is ready
     mainWindow.once('ready-to-show', () => {
         if (!isDev) {
+            console.log('[Main] Checking for updates...');
             electron_updater_1.autoUpdater.checkForUpdatesAndNotify();
+        }
+        else {
+            console.log('[Main] Skiping update check in dev mode.');
+            // Optional: Uncomment to test in dev if you have dev-app-update.yml
+            // autoUpdater.checkForUpdatesAndNotify();
         }
     });
 };
@@ -142,15 +148,19 @@ electron_1.app.on('ready', () => {
     }));
     // --- UPDATE EVENTS ---
     electron_updater_1.autoUpdater.on('checking-for-update', () => {
+        console.log('[Updater] Checking for update...');
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', 'Checking for updates...');
     });
     electron_updater_1.autoUpdater.on('update-available', (info) => {
+        console.log(`[Updater] Update available: ${info.version}`);
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Update available: ${info.version}`);
     });
     electron_updater_1.autoUpdater.on('update-not-available', () => {
+        console.log('[Updater] Update not available.');
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', 'App is up to date.');
     });
     electron_updater_1.autoUpdater.on('error', (err) => {
+        console.error('[Updater] Error:', err);
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
     });
     electron_updater_1.autoUpdater.on('download-progress', (progressObj) => {
