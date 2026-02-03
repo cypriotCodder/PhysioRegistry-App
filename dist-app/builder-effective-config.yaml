@@ -1,0 +1,21 @@
+directories:
+  output: dist-app
+  buildResources: build
+appId: com.physio.registry
+productName: PhysioRegistry
+copyright: Copyright © 2026 Nedim Huray
+publish:
+  - provider: github
+    owner: cypriotCodder
+    repo: PhysioRegistry-App
+files:
+  - filter:
+      - dist/**/*
+      - dist-electron/**/*
+mac:
+  target:
+    - dmg
+    - zip
+win:
+  target: nsis
+electronVersion: 40.1.0
