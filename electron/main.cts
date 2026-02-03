@@ -44,12 +44,10 @@ const createWindow = () => {
     // Check for updates once window is ready
     mainWindow.once('ready-to-show', () => {
         if (!isDev) {
-            console.log('[Main] Checking for updates...');
-            autoUpdater.checkForUpdatesAndNotify();
-        } else {
-            console.log('[Main] Skiping update check in dev mode.');
-            // Optional: Uncomment to test in dev if you have dev-app-update.yml
-            // autoUpdater.checkForUpdatesAndNotify();
+            console.log('[Main] Automatic update check...');
+            autoUpdater.checkForUpdates().catch(err => {
+                console.error('[Main] Failed to check for updates:', err);
+            });
         }
     });
 };
@@ -107,6 +105,14 @@ app.on('ready', () => {
     });
 
     // --- UPDATE EVENTS ---
+    ipcMain.on('check-for-updates', () => {
+        console.log('[Updater] Manual check started');
+        autoUpdater.checkForUpdates().catch(err => {
+            console.error('[Updater] Manual check failed:', err);
+            mainWindow?.webContents.send('update-status', `Check failed: ${err.message}`);
+        });
+    });
+
     autoUpdater.on('checking-for-update', () => {
         console.log('[Updater] Checking for update...');
         mainWindow?.webContents.send('update-status', 'Checking for updates...');
@@ -126,10 +132,10 @@ app.on('ready', () => {
     autoUpdater.on('download-progress', (progressObj) => {
         const percent = progressObj.percent;
         mainWindow?.webContents.send('update-progress', percent);
-        // Keep status message for backward compatibility or simple text display
         mainWindow?.webContents.send('update-status', `Downloading... ${percent.toFixed(0)}%`);
     });
     autoUpdater.on('update-downloaded', (info) => {
+        console.log('[Updater] Update downloaded');
         mainWindow?.webContents.send('update-ready', info.version);
     });
 

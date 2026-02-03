@@ -125,8 +125,26 @@ function AppContent() {
           </>
         )}
       </main>
-      <footer className="app-footer">
-        &copy; {new Date().getFullYear()} Nedim Huray. All rights reserved.
+      <footer className="app-footer" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+        <span>&copy; {new Date().getFullYear()} Nedim Huray. All rights reserved.</span>
+        <button
+          onClick={() => {
+            if (window.require) {
+              window.require('electron').ipcRenderer.send('check-for-updates');
+            }
+          }}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--border-color)',
+            padding: '4px 8px',
+            fontSize: '0.75rem',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            borderRadius: '4px'
+          }}
+        >
+          Check for Updates
+        </button>
       </footer>
     </div>
   )
