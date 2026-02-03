@@ -14,6 +14,7 @@ const electron_1 = require("electron");
 // the ipcRenderer without exposing the entire object
 electron_1.contextBridge.exposeInMainWorld('api', {
     savePatient: (data) => __awaiter(void 0, void 0, void 0, function* () { return yield electron_1.ipcRenderer.invoke('save-patient', data); }),
-    getPatients: () => __awaiter(void 0, void 0, void 0, function* () { return yield electron_1.ipcRenderer.invoke('get-patients'); })
+    getPatients: () => __awaiter(void 0, void 0, void 0, function* () { return yield electron_1.ipcRenderer.invoke('get-patients'); }),
+    deletePatient: (id) => __awaiter(void 0, void 0, void 0, function* () { return yield electron_1.ipcRenderer.invoke('delete-patient', id); })
 });
 //# sourceMappingURL=preload.cjs.map

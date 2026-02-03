@@ -6,9 +6,20 @@
   "main": "dist-electron/main.cjs",
   "description": "Physiotherapy Clinic Registry",
   "author": "Nedim",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/RegisterForm.git"
+  },
   "build": {
     "appId": "com.physio.registry",
     "productName": "PhysioRegistry",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "YOUR_USERNAME",
+        "repo": "RegisterForm"
+      }
+    ],
     "directories": {
       "output": "dist-app"
     },
@@ -17,7 +28,10 @@
       "dist-electron/**/*"
     ],
     "mac": {
-      "target": "dmg"
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
       "target": "nsis"
@@ -32,7 +46,9 @@
     "electron:build": "tsc -p electron/tsconfig.json && vite build && electron-builder"
   },
   "dependencies": {
+    "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
+    "electron-updater": "^6.7.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-quill-new": "^3.8.3",

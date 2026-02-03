@@ -27,5 +27,6 @@ export interface ElectronAPI {
 declare global {
     interface Window {
         api: ElectronAPI;
+        require: any;
     }
 }

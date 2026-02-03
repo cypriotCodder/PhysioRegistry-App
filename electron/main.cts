@@ -1,15 +1,24 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import { autoUpdater } from 'electron-updater';
+import log from 'electron-log';
+
+// Configure logging
+log.transports.file.level = 'info';
+autoUpdater.logger = log;
+autoUpdater.autoDownload = true; // Automatically download updates
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require('electron-squirrel-startup')) {
 //    app.quit();
 // }
 
+let mainWindow: BrowserWindow | null = null;
+
 const createWindow = () => {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1280,
         height: 900,
         webPreferences: {
@@ -31,6 +40,13 @@ const createWindow = () => {
         console.log('[Main] Loading index.html');
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html')).catch(e => console.error('[Main] Failed to load file:', e));
     }
+
+    // Check for updates once window is ready
+    mainWindow.once('ready-to-show', () => {
+        if (!isDev) {
+            autoUpdater.checkForUpdatesAndNotify();
+        }
+    });
 };
 
 app.on('ready', () => {
@@ -83,6 +99,32 @@ app.on('ready', () => {
         } catch (error) {
             return { success: false, error: (error as Error).message };
         }
+    });
+
+    // --- UPDATE EVENTS ---
+    autoUpdater.on('checking-for-update', () => {
+        mainWindow?.webContents.send('update-status', 'Checking for updates...');
+    });
+    autoUpdater.on('update-available', (info) => {
+        mainWindow?.webContents.send('update-status', `Update available: ${info.version}`);
+    });
+    autoUpdater.on('update-not-available', () => {
+        mainWindow?.webContents.send('update-status', 'App is up to date.');
+    });
+    autoUpdater.on('error', (err) => {
+        mainWindow?.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
+    });
+    autoUpdater.on('download-progress', (progressObj) => {
+        let log_message = `Download speed: ${progressObj.bytesPerSecond} - ${progressObj.percent}%`;
+        mainWindow?.webContents.send('update-status', `Downloading: ${progressObj.percent.toFixed(0)}%`);
+    });
+    autoUpdater.on('update-downloaded', (info) => {
+        mainWindow?.webContents.send('update-ready', info.version);
+    });
+
+    // Restart app to install
+    ipcMain.on('restart-app', () => {
+        autoUpdater.quitAndInstall();
     });
 });
 

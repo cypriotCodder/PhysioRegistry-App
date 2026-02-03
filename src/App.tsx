@@ -2,6 +2,7 @@ import { useState } from 'react';
 import RegistryForm from './components/RegistryForm';
 import PatientList from './components/PatientList';
 import StatisticsDashboard from './components/StatisticsDashboard';
+import UpdateNotification from './components/UpdateNotification';
 import type { Patient } from './types';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
@@ -30,6 +31,7 @@ function AppContent() {
 
   return (
     <div className="app-container">
+      <UpdateNotification />
       <header style={{
         background: '#fff',
         padding: '1rem 2rem',

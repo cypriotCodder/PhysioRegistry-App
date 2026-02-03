@@ -77,20 +77,37 @@ electron_1.app.on('ready', () => {
     createWindow();
     // Ensure registry directory exists
     const registryPath = path.join(electron_1.app.getPath('userData'), 'registry');
+    console.log(`[Storage] Patient data location: ${registryPath}`);
     if (!fs.existsSync(registryPath)) {
         fs.mkdirSync(registryPath);
     }
     // IPC Handlers
     electron_1.ipcMain.handle('save-patient', (event, patientData) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            // Create a filename based on ID or Name
-            const filename = `${patientData.id}_${patientData.name.replace(/\s+/g, '_')}.json`;
+            // Use ID as filename to prevent duplicates on rename
+            const filename = `${patientData.id}.json`;
             const filePath = path.join(registryPath, filename);
             fs.writeFileSync(filePath, JSON.stringify(patientData, null, 2));
             return { success: true, filePath };
         }
         catch (error) {
             console.error('Failed to save:', error);
+            return { success: false, error: error.message };
+        }
+    }));
+    electron_1.ipcMain.handle('delete-patient', (event, id) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const filename = `${id}.json`;
+            const filePath = path.join(registryPath, filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+                return { success: true };
+            }
+            else {
+                return { success: false, error: 'File not found' };
+            }
+        }
+        catch (error) {
             return { success: false, error: error.message };
         }
     }));
