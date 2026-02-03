@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import RegistryForm from './components/RegistryForm';
 import PatientList from './components/PatientList';
+import StatisticsDashboard from './components/StatisticsDashboard';
 import type { Patient } from './types';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
-type View = 'list' | 'form';
+type View = 'list' | 'form' | 'stats';
 
 function AppContent() {
   const [view, setView] = useState<View>('list');
@@ -64,6 +65,16 @@ function AppContent() {
           </button>
 
           <button
+            onClick={() => setView('stats')}
+            style={{
+              background: view === 'stats' ? 'var(--primary-light)' : 'transparent',
+              color: view === 'stats' ? 'var(--primary)' : 'var(--text-secondary)'
+            }}
+          >
+            {t('statistics')}
+          </button>
+
+          <button
             onClick={() => setView('list')}
             style={{
               background: view === 'list' ? 'var(--primary-light)' : 'transparent',
@@ -77,10 +88,11 @@ function AppContent() {
           </button>
         </div>
       </header>
-
       <main style={{ paddingBottom: '50px' }}>
         {view === 'list' ? (
           <PatientList onSelectPatient={handleEditPatient} />
+        ) : view === 'stats' ? (
+          <StatisticsDashboard />
         ) : (
           <>
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>

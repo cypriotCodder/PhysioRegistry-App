@@ -167,6 +167,28 @@ const RegistryForm: React.FC<RegistryFormProps> = ({ onSave, initialData }) => {
         });
     };
 
+    const formatPaymentDate = (isoString?: string) => {
+        if (!isoString) return '-';
+        return new Date(isoString).toLocaleString('tr-TR', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const deletePayment = async (paymentId: string) => {
+        if (!confirm(t('confirmDeletePayment'))) return;
+
+        const updatedPayments = patient.payments.filter(p => p.id !== paymentId);
+        setPatient({ ...patient, payments: updatedPayments });
+
+        if (initialData) {
+            await savePatientData({ ...patient, payments: updatedPayments });
+        }
+    };
+
     // --- RENDER View Mode (Dashboard) ---
     if (!isEditing && initialData) {
         return (
@@ -257,14 +279,31 @@ const RegistryForm: React.FC<RegistryFormProps> = ({ onSave, initialData }) => {
                                     <th style={{ padding: '10px' }}>{t('date')}</th>
                                     <th style={{ padding: '10px' }}>{t('description')}</th>
                                     <th style={{ padding: '10px', textAlign: 'right' }}>{t('amount')}</th>
+                                    <th style={{ padding: '10px', width: '50px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {patient.payments.map((p) => (
                                     <tr key={p.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '10px' }}>{formatDate(p.date)}</td>
+                                        <td style={{ padding: '10px' }}>{formatPaymentDate(p.date)}</td>
                                         <td style={{ padding: '10px' }}>{p.description || '-'}</td>
                                         <td style={{ padding: '10px', textAlign: 'right', fontWeight: 'bold' }}>{p.amount} {t('currency')}</td>
+                                        <td style={{ padding: '10px' }}>
+                                            <button
+                                                onClick={() => deletePayment(p.id)}
+                                                style={{
+                                                    background: 'transparent',
+                                                    border: 'none',
+                                                    color: '#d32f2f',
+                                                    cursor: 'pointer',
+                                                    fontSize: '1.2rem',
+                                                    padding: '0 5px'
+                                                }}
+                                                title={t('deletePayment')}
+                                            >
+                                                &times;
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

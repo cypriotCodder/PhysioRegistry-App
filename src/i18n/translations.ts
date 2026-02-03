@@ -56,6 +56,8 @@ export const translations = {
         description: 'Description',
         noPayments: 'No payments recorded',
         currency: '$', // Or whatever default
+        deletePayment: 'Delete Payment',
+        confirmDeletePayment: 'Are you sure you want to delete this payment?',
 
         // App Navigation
         editPatientProfile: 'Edit Patient Profile',
@@ -63,7 +65,16 @@ export const translations = {
         viewingRecord: 'Viewing record for {name}',
         enterDetails: 'Enter new details below.',
         createdAt: 'Created At',
-        updatedAt: 'Last Updated'
+        updatedAt: 'Last Updated',
+
+        // Statistics
+        statistics: 'Statistics',
+        totalPatients: 'Total Patients',
+        totalIncome: 'Total Income',
+        averageIncome: 'Average Income per Patient',
+        incomeOverTime: 'Income Over Time',
+        daily: 'Daily',
+        monthly: 'Monthly'
     },
     tr: {
         // Header
@@ -120,6 +131,8 @@ export const translations = {
         description: 'Açıklama',
         noPayments: 'Kayıtlı ödeme yok',
         currency: '₺',
+        deletePayment: 'Ödemeyi Sil',
+        confirmDeletePayment: 'Bu ödemeyi silmek istediğinize emin misiniz?',
 
         // App Navigation
         editPatientProfile: 'Hasta Profilini Düzenle',
@@ -127,6 +140,15 @@ export const translations = {
         viewingRecord: '{name} kaydı görüntüleniyor',
         enterDetails: 'Aşağıdaki bilgileri doldurun.',
         createdAt: 'Oluşturulma Tarihi',
-        updatedAt: 'Son Güncelleme'
+        updatedAt: 'Son Güncelleme',
+
+        // Statistics
+        statistics: 'İstatistikler',
+        totalPatients: 'Toplam Hasta',
+        totalIncome: 'Toplam Gelir',
+        averageIncome: 'Hasta Başına Ortalama Gelir',
+        incomeOverTime: 'Zaman İçinde Gelir',
+        daily: 'Günlük',
+        monthly: 'Aylık'
     }
 };
