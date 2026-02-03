@@ -41,17 +41,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const electron_updater_1 = require("electron-updater");
+const electron_log_1 = __importDefault(require("electron-log"));
+// Configure logging
+electron_log_1.default.transports.file.level = 'info';
+electron_updater_1.autoUpdater.logger = electron_log_1.default;
+electron_updater_1.autoUpdater.autoDownload = true; // Automatically download updates
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require('electron-squirrel-startup')) {
 //    app.quit();
 // }
+let mainWindow = null;
 const createWindow = () => {
     // Create the browser window.
-    const mainWindow = new electron_1.BrowserWindow({
+    mainWindow = new electron_1.BrowserWindow({
         width: 1280,
         height: 900,
         webPreferences: {
@@ -72,6 +82,12 @@ const createWindow = () => {
         console.log('[Main] Loading index.html');
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html')).catch(e => console.error('[Main] Failed to load file:', e));
     }
+    // Check for updates once window is ready
+    mainWindow.once('ready-to-show', () => {
+        if (!isDev) {
+            electron_updater_1.autoUpdater.checkForUpdatesAndNotify();
+        }
+    });
 };
 electron_1.app.on('ready', () => {
     createWindow();
@@ -124,6 +140,30 @@ electron_1.app.on('ready', () => {
             return { success: false, error: error.message };
         }
     }));
+    // --- UPDATE EVENTS ---
+    electron_updater_1.autoUpdater.on('checking-for-update', () => {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', 'Checking for updates...');
+    });
+    electron_updater_1.autoUpdater.on('update-available', (info) => {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Update available: ${info.version}`);
+    });
+    electron_updater_1.autoUpdater.on('update-not-available', () => {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', 'App is up to date.');
+    });
+    electron_updater_1.autoUpdater.on('error', (err) => {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Error in auto-updater: ${err.message}`);
+    });
+    electron_updater_1.autoUpdater.on('download-progress', (progressObj) => {
+        let log_message = `Download speed: ${progressObj.bytesPerSecond} - ${progressObj.percent}%`;
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-status', `Downloading: ${progressObj.percent.toFixed(0)}%`);
+    });
+    electron_updater_1.autoUpdater.on('update-downloaded', (info) => {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send('update-ready', info.version);
+    });
+    // Restart app to install
+    electron_1.ipcMain.on('restart-app', () => {
+        electron_updater_1.autoUpdater.quitAndInstall();
+    });
 });
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

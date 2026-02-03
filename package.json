@@ -1,14 +1,14 @@
 {
   "name": "register-form",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist-electron/main.cjs",
   "description": "Physiotherapy Clinic Registry",
-  "author": "Nedim",
+  "author": "Nedim Huray",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/RegisterForm.git"
+    "url": "git+https://github.com/cypriotCodder/PhysioRegistry-App.git"
   },
   "build": {
     "appId": "com.physio.registry",
