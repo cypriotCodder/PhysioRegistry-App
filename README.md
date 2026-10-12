@@ -1,73 +1,102 @@
-# React + TypeScript + Vite
+# PhysioRegistry
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**A local-first desktop app for physiotherapy clinics to manage patient records, treatment notes, and payments — entirely offline.**
 
-Currently, two official plugins are available:
+Built with Electron, React 19, and TypeScript. Patient data is stored as plain JSON files on the clinician's own machine; nothing is sent to a server or the cloud, which keeps sensitive clinical records on-site by design.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<p align="center"><em>⬇️ Add screenshots here — see <a href="#screenshots">Screenshots</a>.</em></p>
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Why it exists
 
-## Expanding the ESLint configuration
+Small clinics often track patients in spreadsheets or paper files. PhysioRegistry gives a physiotherapist a single desktop application to register patients, keep formatted treatment histories, log payments, and see clinic-level statistics — without a subscription, an internet connection, or patient data leaving the computer.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Patient registry** — create, edit, search, and delete patient records (name, date of birth, contact, address, diagnosis).
+- **Rich-text treatment notes** — a formatted editor (React Quill) for each patient's ongoing treatment story.
+- **Payment tracking** — log dated payments per patient with amounts and descriptions.
+- **Statistics dashboard** — clinic metrics and total income visualised with charts (Recharts).
+- **Bilingual UI** — full Turkish/English interface, switchable at runtime via React Context.
+- **Offline-first storage** — every patient is a JSON file in the OS app-data directory; no database server to install or maintain.
+- **Auto-updates** — packaged builds check GitHub Releases and update themselves in the background (electron-updater).
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tech stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Area | Tools |
+| --- | --- |
+| Desktop shell | Electron 40 |
+| UI | React 19, TypeScript, Vite 7 |
+| Editor & charts | React Quill, Recharts |
+| Packaging & updates | electron-builder, electron-updater, electron-log |
+| CI | GitHub Actions (tag-triggered build & publish) |
+
+## Architecture
+
+PhysioRegistry follows Electron's two-process model. The React UI runs in the **renderer** and never touches the filesystem directly; all persistence happens in the **main** process over IPC.
+
+```text
+┌────────────────────────────┐        IPC        ┌──────────────────────────────┐
+│  Renderer (React + Vite)   │  save/get/delete  │  Main process (Electron)      │
+│  • Patient form & list     │ ───────────────▶  │  • IPC handlers               │
+│  • Treatment-notes editor  │ ◀───────────────  │  • Reads/writes JSON files    │
+│  • Statistics dashboard    │     patient data  │  • Auto-update (GitHub)       │
+└────────────────────────────┘                   └──────────────┬───────────────┘
+                                                                 │
+                                                       userData/registry/<id>.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Each patient is persisted as `<userData>/registry/<patient-id>.json`, so records are human-readable, easy to back up, and keyed by ID to stay stable across renames.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Getting started
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Prerequisites:** Node.js 20+.
+
+```bash
+git clone https://github.com/cypriotCodder/PhysioRegistry-App.git
+cd PhysioRegistry-App
+npm install
+
+# Run in development (Vite dev server + Electron with hot reload)
+npm run electron:dev
 ```
+
+### Building a distributable
+
+```bash
+# Produce installers for the current platform (macOS .dmg/.zip, Windows .nsis)
+npm run electron:build
+```
+
+Installers are written to `dist-app/`. Tagging a release (`git tag v0.1.14 && git push --tags`) triggers the GitHub Actions workflow, which builds and publishes the release automatically.
+
+## Where patient data lives
+
+Records are stored under the Electron `userData` directory:
+
+| OS | Path |
+| --- | --- |
+| Windows | `%APPDATA%/PhysioRegistry/registry/` |
+| macOS | `~/Library/Application Support/PhysioRegistry/registry/` |
+
+Backing up the clinic's data is as simple as copying that folder.
+
+## Roadmap / known limitations
+
+- **Harden the Electron security model** — the current build uses `nodeIntegration` with IPC for simplicity; migrating to a strict `contextIsolation` + typed preload bridge is the next step.
+- **Encryption at rest** for the local record files.
+- **Export** to PDF/CSV for individual patient histories and payment reports.
+
+## Screenshots
+
+> _Add a few screenshots so visitors can see the app without building it. Suggested shots: the patient list, the registry form with the notes editor, and the statistics dashboard. Place image files in `docs/screenshots/` and reference them here, e.g._
+>
+> ```markdown
+> ![Patient list](docs/screenshots/patient-list.png)
+> ![Statistics dashboard](docs/screenshots/dashboard.png)
+> ```
+
+## License
+
+Copyright © 2026 Nedim Hüray. All rights reserved.
