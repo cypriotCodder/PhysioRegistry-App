@@ -99,4 +99,4 @@ Backing up the clinic's data is as simple as copying that folder.
 
 ## License
 
-Copyright © 2026 Nedim Hüray. All rights reserved.
+Released under the [MIT License](LICENSE).
